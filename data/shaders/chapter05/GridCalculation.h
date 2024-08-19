@@ -18,7 +18,7 @@ float max2(vec2 v)
 	return max(v.x, v.y);
 }
 
-vec4 gridColor(vec2 uv)
+vec4 gridColor(vec2 uv, vec2 camPos)
 {
 	vec2 dudv = vec2(
 		length(vec2(dFdx(uv.x), dFdy(uv.x))),
@@ -36,10 +36,15 @@ vec4 gridColor(vec2 uv)
 	// each anti-aliased line covers up to 4 pixels
 	dudv *= 4.0;
 
+	// Update grid coordinates for subsequent alpha calculations (centers each anti-aliased line)
+  	uv += dudv / 2.0F;
+
 	// calculate absolute distances to cell line centers for each lod and pick max X/Y to get coverage alpha value
 	float lod0a = max2( vec2(1.0) - abs(satv(mod(uv, lod0) / dudv) * 2.0 - vec2(1.0)) );
 	float lod1a = max2( vec2(1.0) - abs(satv(mod(uv, lod1) / dudv) * 2.0 - vec2(1.0)) );
 	float lod2a = max2( vec2(1.0) - abs(satv(mod(uv, lod2) / dudv) * 2.0 - vec2(1.0)) );
+
+	uv -= camPos;
 
 	// blend between falloff colors to handle LOD transition
 	vec4 c = lod2a > 0.0 ? gridColorThick : lod1a > 0.0 ? mix(gridColorThick, gridColorThin, lodFade) : gridColorThin;

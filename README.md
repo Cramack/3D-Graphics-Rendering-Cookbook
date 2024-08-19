@@ -1,3 +1,6 @@
+
+
+
 # 3D Graphics Rendering Cookbook
 
 **A comprehensive guide to exploring rendering algorithms in modern OpenGL and Vulkan**

@@ -12,9 +12,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
-#include "stb_image_resize.h"
+#include "stb_image_resize2.h"
 
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -172,7 +170,7 @@ static size_t compileShader(glslang_stage_t stage, const char* shaderSource, Sha
 		.force_default_version_and_profile = false,
 		.forward_compatible = false,
 		.messages = GLSLANG_MSG_DEFAULT_BIT,
-		.resource = (const glslang_resource_t*)&glslang::DefaultTBuiltInResource,
+		.resource = glslang_default_resource(),
 	};
 
 	glslang_shader_t* shader = glslang_shader_create(&input);
@@ -2311,8 +2309,8 @@ bool createMIPTextureImage(VulkanRenderDevice& vkDev, const char* filename, uint
 	{
 		dst += (w * h * texChannels) >> 2;
 
-		stbir_resize_uint8(src, w, h, 0,
-				dst, w / 2, h / 2, 0, texChannels);
+		stbir_resize_uint8_linear(src, w, h, 0,
+			dst, w / 2, h / 2, 0, (stbir_pixel_layout)texChannels);
 
 		w >>= 1;
 		h >>= 1;
@@ -2505,9 +2503,9 @@ bool createMIPCubeTextureImage(VulkanRenderDevice& vkDev, const char* filename, 
 	{
 		imageSize = w * h * 4;
 		dst += w * h * 4;
-		stbir_resize_float_generic(
-			src, w, h, 0, dst, w / 2, h / 2, 0, 4,
-			STBIR_ALPHA_CHANNEL_NONE, 0, STBIR_EDGE_CLAMP, STBIR_FILTER_CUBICBSPLINE, STBIR_COLORSPACE_LINEAR, nullptr);
+		stbir_resize(
+			src, w, h, 0, dst, w / 2, h / 2, 0, STBIR_RGBA, STBIR_TYPE_FLOAT,
+			STBIR_EDGE_WRAP, STBIR_FILTER_CUBICBSPLINE);
 
 		w >>= 1;
 		h >>= 1;
